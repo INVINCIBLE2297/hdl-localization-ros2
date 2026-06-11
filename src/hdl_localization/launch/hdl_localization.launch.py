@@ -59,37 +59,20 @@ def _launch_setup(context, *args, **kwargs):
             launch_arguments=[('use_sim_time', use_sim_time)],
             condition=IfCondition(use_global_localization),
         ),
-        # Node(
-        #     package='tf2_ros',
-        #     executable='static_transform_publisher',
-        #     name='base_to_livox_tf',
-        #     arguments=[
-        #         '--x', str(base_to_livox_x),
-        #         '--y', str(base_to_livox_y),
-        #         '--z', str(base_to_livox_z),
-        #         '--qx', str(base_to_livox_qx),
-        #         '--qy', str(base_to_livox_qy),
-        #         '--qz', str(base_to_livox_qz),
-        #         '--qw', str(base_to_livox_qw),
-        #         '--frame-id', odom_child_frame_id,
-        #         '--child-frame-id', 'livox_frame',
-        #     ],
-        #     parameters=[{'use_sim_time': sim_time_param}],
-        # ),
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            name='livox_to_base_tf',
+            name='base_to_livox_tf',
             arguments=[
-                '--x', str(-base_to_livox_x),
-                '--y', str(-base_to_livox_y),
-                '--z', str(-base_to_livox_z),
-                '--qx', str(-base_to_livox_qx),
-                '--qy', str(-base_to_livox_qy),
-                '--qz', str(-base_to_livox_qz),
+                '--x', str(base_to_livox_x),
+                '--y', str(base_to_livox_y),
+                '--z', str(base_to_livox_z),
+                '--qx', str(base_to_livox_qx),
+                '--qy', str(base_to_livox_qy),
+                '--qz', str(base_to_livox_qz),
                 '--qw', str(base_to_livox_qw),
                 '--frame-id', odom_child_frame_id,
-                '--child-frame-id', 'base_link',
+                '--child-frame-id', 'livox_frame',
             ],
             parameters=[{'use_sim_time': sim_time_param}],
         ),
@@ -156,7 +139,7 @@ def _launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     pkg_loc = get_package_share_directory('hdl_localization')
-    default_map = os.path.join(pkg_loc, 'data', 'glim.pcd')
+    default_map = os.path.join(pkg_loc, 'data', 'map.pcd')
 
     if not os.path.isfile(default_map):
         raise RuntimeError(
@@ -179,7 +162,7 @@ def generate_launch_description():
         DeclareLaunchArgument('points_topic', default_value='/livox/pointcloud2'),
         DeclareLaunchArgument('imu_topic', default_value='/livox/imu'),
         DeclareLaunchArgument('robot_odom_frame_id', default_value='odom'),
-        DeclareLaunchArgument('odom_child_frame_id', default_value='livox_frame'),
+        DeclareLaunchArgument('odom_child_frame_id', default_value='base_link'),
         DeclareLaunchArgument('send_tf_transforms', default_value='true'),
         DeclareLaunchArgument(
             'globalmap_pcd',
