@@ -139,7 +139,7 @@ def _launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     pkg_loc = get_package_share_directory('hdl_localization')
-    default_map = os.path.join(pkg_loc, 'data', 'map.pcd')
+    default_map = os.path.join(pkg_loc, 'data', 'glim.pcd')
 
     if not os.path.isfile(default_map):
         raise RuntimeError(

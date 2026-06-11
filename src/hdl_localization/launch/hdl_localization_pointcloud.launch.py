@@ -175,8 +175,8 @@ def generate_launch_description():
             description='If true, call /relocalize when scan matching RMSE exceeds threshold.'),
         DeclareLaunchArgument('auto_relocalize_error_threshold', default_value='0.2'),
         DeclareLaunchArgument('auto_relocalize_cooldown', default_value='5.0'),
-        DeclareLaunchArgument('use_imu', default_value='false'),
-        DeclareLaunchArgument('invert_imu_acc', default_value='true'),
+        DeclareLaunchArgument('use_imu', default_value='true'),
+        DeclareLaunchArgument('invert_imu_acc', default_value='false'),
         DeclareLaunchArgument('invert_imu_gyro', default_value='false'),
         DeclareLaunchArgument(
             'specify_init_pose', default_value='true',
