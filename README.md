@@ -1,6 +1,7 @@
 # hdl_ws_ros2
 
-成功完成任务，tf:map->base_link->livox_frame，和dddmr结合时发生错误，暂时弃用
+成功完成任务，tf:map->base_link->livox_frame
+解决了rviz2给初始位姿给错坐标系的问题
 
 ROS 2 Humble 移植版 HDL 定位工作空间：基于 NDT_OMP 的实时 3D 定位，支持全局重定位（`/relocalize`）。由 ROS 1 工程 [hdl_ws] 迁移而来。
 
