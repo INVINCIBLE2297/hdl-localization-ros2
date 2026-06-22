@@ -637,13 +637,28 @@ private:
 
     const auto& p = pose_msg->pose.pose.position;
     const auto& q = pose_msg->pose.pose.orientation;
+    auto tf = tf_buffer->lookupTransform(
+        "livox_frame",
+        "base_link",
+        rclcpp::Time(0));
 
+    tf2::Transform T;
+    tf2::fromMsg(tf.transform, T);
+
+    tf2::Transform P(
+        tf2::Quaternion(q.x, q.y, q.z, q.w),
+        tf2::Vector3(p.x, p.y, p.z));
+
+    tf2::Transform P_livox = T * P;
+
+    auto p_new = P_livox.getOrigin();
+    auto q_new = P_livox.getRotation();
     pose_estimator.reset(
       new hdl_localization::PoseEstimator(
         registration,
         get_clock()->now(),
-        Eigen::Vector3f(p.x, p.y, p.z),
-        Eigen::Quaternionf(q.w, q.x, q.y, q.z),
+        Eigen::Vector3f(p_new.x(), p_new.y(), p_new.z()),
+        Eigen::Quaternionf(q_new.w(), q_new.x(), q_new.y(), q_new.z()),
         cool_time_duration));
   }
 
