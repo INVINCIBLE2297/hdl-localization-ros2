@@ -14,7 +14,7 @@ class LivoxCustomToPointCloud2(Node):
         self.declare_parameter('input_topic', '/livox/lidar')
         self.declare_parameter('output_topic', '/livox/pointcloud2')
         self.declare_parameter('frame_id', 'livox_frame')
-        self.declare_parameter('queue_size', 100)
+        self.declare_parameter('queue_size', 1)
 
         self.input_topic = self.get_parameter('input_topic').get_parameter_value().string_value
         self.output_topic = self.get_parameter('output_topic').get_parameter_value().string_value

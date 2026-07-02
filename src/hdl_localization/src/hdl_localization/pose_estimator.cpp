@@ -31,8 +31,8 @@ PoseEstimator::PoseEstimator(pcl::Registration<PointT, PointT>::Ptr& registratio
   process_noise.middleRows(13, 3) *= 1e-6;
 
   Eigen::MatrixXf measurement_noise = Eigen::MatrixXf::Identity(7, 7);
-  measurement_noise.middleRows(0, 3) *= 0.001;
-  measurement_noise.middleRows(3, 4) *= 0.0005;
+  measurement_noise.middleRows(0, 3) *= 0.055;
+  measurement_noise.middleRows(3, 4) *= 0.055;
 
   Eigen::VectorXf mean(16);
   mean.middleRows(0, 3) = pos;
