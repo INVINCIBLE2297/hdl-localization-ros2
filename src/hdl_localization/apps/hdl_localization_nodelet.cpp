@@ -681,118 +681,74 @@ private:
   }
 
   void publish_odometry(const rclcpp::Time& stamp, const Eigen::Matrix4f& pose) {
-    Eigen::Isometry3d T_map_base;
-    // print begin
-    Eigen::Matrix3f R_pose = pose.block<3,3>(0,0);
-
-    Eigen::Vector3f rpy_pose =
-        R_pose.eulerAngles(2,1,0);
-
-    RCLCPP_INFO_THROTTLE(
-        get_logger(),
-        *get_clock(),
-        2.0,
-        "POSE: roll=%.2f pitch=%.2f yaw=%.2f",
-        rpy_pose[2] * 180.0 / M_PI,
-        rpy_pose[1] * 180.0 / M_PI,
-        rpy_pose[0] * 180.0 / M_PI);
-    // print end
-    if (tf_buffer->canTransform(
-            "base_link",
-            "livox_frame",
-            rclcpp::Time((int64_t)0, get_clock()->get_clock_type()))){
-      geometry_msgs::msg::TransformStamped base_to_livox =
-        tf_buffer->lookupTransform(
-            "base_link",
-            "livox_frame",
-            rclcpp::Time((int64_t)0, get_clock()->get_clock_type()));
-      // begin
-      Eigen::Isometry3d T_bl_livox =
-          tf2::transformToEigen(base_to_livox);
-
-      Eigen::Vector3d rpy_tf =
-          T_bl_livox.rotation().eulerAngles(2,1,0);
-
-      RCLCPP_INFO_THROTTLE(
-          get_logger(),
-          *get_clock(),
-          2.0,
-          "BL_LIVOX: roll=%.2f pitch=%.2f yaw=%.2f",
-          rpy_tf[2] * 180.0 / M_PI,
-          rpy_tf[1] * 180.0 / M_PI,
-          rpy_tf[0] * 180.0 / M_PI);
-      // end
-      T_map_base = 
-        Eigen::Isometry3d(pose.cast<double>()) * tf2::transformToEigen(base_to_livox).inverse();
-      // begin
-      Eigen::Vector3d rpy_base =
-          T_map_base.rotation().eulerAngles(2,1,0);
-
-      RCLCPP_INFO_THROTTLE(
-          get_logger(),
-          *get_clock(),
-          2.0,
-          "MAP_BASE: roll=%.2f pitch=%.2f yaw=%.2f",
-          rpy_base[2] * 180.0 / M_PI,
-          rpy_base[1] * 180.0 / M_PI,
-          rpy_base[0] * 180.0 / M_PI);
-      // print end
-    }else{
-      RCLCPP_ERROR(get_logger(), "tf_error");
-      return;
-    }
+    
     if (send_tf_transforms) {
       if (tf_buffer->canTransform(
             robot_odom_frame_id,
-            odom_child_frame_id,
+            "livox_frame",
             rclcpp::Time((int64_t)0, get_clock()->get_clock_type()))) {
-        geometry_msgs::msg::TransformStamped map_wrt_frame =
-          tf2::eigenToTransform(T_map_base.inverse());
-        map_wrt_frame.header.stamp = stamp;
-        map_wrt_frame.header.frame_id = odom_child_frame_id;
-        map_wrt_frame.child_frame_id = "map";
-
-        geometry_msgs::msg::TransformStamped frame_wrt_odom =
+        Eigen::Isometry3d T_map_odom;
+        geometry_msgs::msg::TransformStamped odom_to_livox =
           tf_buffer->lookupTransform(
-            robot_odom_frame_id,
-            odom_child_frame_id,
-            rclcpp::Time((int64_t)0, get_clock()->get_clock_type()),
-            rclcpp::Duration(std::chrono::milliseconds(100)));
+              robot_odom_frame_id,
+              "livox_frame",
+              rclcpp::Time((int64_t)0, get_clock()->get_clock_type()));
+        T_map_odom = 
+          Eigen::Isometry3d(pose.cast<double>()) * tf2::transformToEigen(odom_to_livox).inverse();
 
-        geometry_msgs::msg::TransformStamped map_wrt_odom;
-        tf2::doTransform(map_wrt_frame, map_wrt_odom, frame_wrt_odom);
-
-        tf2::Transform odom_wrt_map;
-        tf2::fromMsg(map_wrt_odom.transform, odom_wrt_map);
-        odom_wrt_map = odom_wrt_map.inverse();
-
-        geometry_msgs::msg::TransformStamped odom_trans;
-        odom_trans.transform = tf2::toMsg(odom_wrt_map);
+        geometry_msgs::msg::TransformStamped odom_trans =
+          tf2::eigenToTransform(T_map_odom);
         odom_trans.header.stamp = stamp;
         odom_trans.header.frame_id = "map";
         odom_trans.child_frame_id = robot_odom_frame_id;
-
         tf_broadcaster->sendTransform(odom_trans);
+        // nav_msgs::msg::Odometry odom;
+        // odom.header.stamp = stamp;
+        // odom.header.frame_id = "map";
+        // odom.pose.pose = tf2::toMsg(T_map_odom);
+        // odom.child_frame_id = robot_odom_frame_id;
+        // odom.twist.twist.linear.x = 0.0;
+        // odom.twist.twist.linear.y = 0.0;
+        // odom.twist.twist.angular.z = 0.0;
+
+        // pose_pub->publish(odom);
       } else {
+        Eigen::Isometry3d T_map_base;
+        if (tf_buffer->canTransform(
+                "base_link",
+                "livox_frame",
+                rclcpp::Time((int64_t)0, get_clock()->get_clock_type()))){
+          geometry_msgs::msg::TransformStamped base_to_livox =
+            tf_buffer->lookupTransform(
+                "base_link",
+                "livox_frame",
+                rclcpp::Time((int64_t)0, get_clock()->get_clock_type()));
+          T_map_base = 
+            Eigen::Isometry3d(pose.cast<double>()) * tf2::transformToEigen(base_to_livox).inverse();
+        }else{
+          RCLCPP_ERROR(get_logger(), "tf_error");
+          return;
+        }
         geometry_msgs::msg::TransformStamped odom_trans =
           tf2::eigenToTransform(T_map_base);
         odom_trans.header.stamp = stamp;
         odom_trans.header.frame_id = "map";
         odom_trans.child_frame_id = odom_child_frame_id;
         tf_broadcaster->sendTransform(odom_trans);
+        nav_msgs::msg::Odometry odom;
+        odom.header.stamp = stamp;
+        odom.header.frame_id = "map";
+        odom.pose.pose = tf2::toMsg(T_map_base);
+        odom.child_frame_id = odom_child_frame_id;
+        odom.twist.twist.linear.x = 0.0;
+        odom.twist.twist.linear.y = 0.0;
+        odom.twist.twist.angular.z = 0.0;
+
+        pose_pub->publish(odom);
       }
     }
 
-    nav_msgs::msg::Odometry odom;
-    odom.header.stamp = stamp;
-    odom.header.frame_id = "map";
-    odom.pose.pose = tf2::toMsg(T_map_base);
-    odom.child_frame_id = odom_child_frame_id;
-    odom.twist.twist.linear.x = 0.0;
-    odom.twist.twist.linear.y = 0.0;
-    odom.twist.twist.angular.z = 0.0;
-
-    pose_pub->publish(odom);
+    
   }
 
   void publish_scan_matching_status(
