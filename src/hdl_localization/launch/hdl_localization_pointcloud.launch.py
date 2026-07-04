@@ -108,7 +108,7 @@ def _launch_setup(context, *args, **kwargs):
                         'invert_acc': ParameterValue(invert_imu_acc, value_type=bool),
                         'invert_gyro': ParameterValue(invert_imu_gyro, value_type=bool),
                         'cool_time_duration': 0.2,
-                        'enable_robot_odometry_prediction': False,
+                        'enable_robot_odometry_prediction': True,
                         'send_tf_transforms': ParameterValue(send_tf_transforms, value_type=bool),
                         'odom_child_frame_id': ParameterValue(odom_child_frame_id, value_type=str),
                         'robot_odom_frame_id': ParameterValue(robot_odom_frame_id, value_type=str),
@@ -139,7 +139,7 @@ def _launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     pkg_loc = get_package_share_directory('hdl_localization')
-    default_map = os.path.join(pkg_loc, 'data', 'map.pcd')
+    default_map = os.path.join(pkg_loc, 'data', 'map9.pcd')
 
     if not os.path.isfile(default_map):
         raise RuntimeError(

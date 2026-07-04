@@ -342,8 +342,7 @@ private:
       }
 
       rclcpp::Time last_correction_time = pose_estimator->last_correction_time();
-      if (enable_robot_odometry_prediction &&
-          last_correction_time != rclcpp::Time((int64_t)0, get_clock()->get_clock_type())) {
+      if (enable_robot_odometry_prediction && last_correction_time.nanoseconds() > 0) {
         geometry_msgs::msg::TransformStamped odom_delta;
 
         if (tf_buffer->canTransform(
