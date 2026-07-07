@@ -131,9 +131,9 @@ def _launch_setup(context, *args, **kwargs):
                         'robot_odom_frame_id': ParameterValue(robot_odom_frame_id, value_type=str),
                         'reg_method': 'NDT_OMP',
                         'ndt_neighbor_search_method': 'DIRECT7',
-                        'ndt_neighbor_search_radius': 4.0,
-                        'ndt_resolution': 0.5,
-                        'downsample_resolution': 0.1,
+                        'ndt_neighbor_search_radius': 1.0,
+                        'ndt_resolution': 0.8,
+                        'downsample_resolution': 0.2,
                         'specify_init_pose': specify_init_pose,
                         'init_pos_x': init_pos_x,
                         'init_pos_y': init_pos_y,
@@ -156,7 +156,7 @@ def _launch_setup(context, *args, **kwargs):
 
 def generate_launch_description():
     pkg_loc = get_package_share_directory('hdl_localization')
-    default_map = os.path.join(pkg_loc, 'data', 'outdoor_corridor.pcd')
+    default_map = os.path.join(pkg_loc, 'data', 'outdoor_corridor_2layers_fix.pcd')
 
     if not os.path.isfile(default_map):
         raise RuntimeError(
